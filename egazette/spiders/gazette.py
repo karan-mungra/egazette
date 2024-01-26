@@ -13,7 +13,6 @@ class GazetteSpider(scrapy.Spider):
     def __init__(self, name=None, **kwargs):
         self.allowed_domains = ["gov.in"]
         self.start_urls = ["https://egazette.gov.in/"]
-        self.page = 1
         super().__init__(name, **kwargs)
 
     def parse(self, response):
@@ -22,10 +21,20 @@ class GazetteSpider(scrapy.Spider):
 
     def parse_data(self, response):
         self.logger.debug(f"**Gazette Directory Loaded Successfully**: {response.url}")
-        yield GazetteDirectorySubmitRequest.request(
-            response=response,
-            callback=self.after_page_loaded,
-        )
+        for y in range(2023, 2025):
+            formdata = {
+                "ddlCategory": "Extra Ordinary",
+                "ddlPartSection": "Select Part & Section",
+                "ddlYear": f"{y}",
+                "btnSubmit.x": "48",
+                "btnSubmit.y": "14",
+            }
+            self.page = 1
+            yield GazetteDirectorySubmitRequest.request(
+                year=y,
+                response=response,
+                callback=self.after_page_loaded,
+            )
 
     def after_page_loaded(self, response: Response):
         if response.status != 200:
@@ -42,10 +51,12 @@ class GazetteSpider(scrapy.Spider):
                 int(response.css("#lbl_Result::text").get().split(":")[-1].strip())
                 // DOCUMENT_COUNT
             )
+            self.total_pages = 2
+        print("*** DEBUG ***", self.total_pages, "***", self.page)
         for i in range(0, DOCUMENT_COUNT):
             document = ItemLoader(item=EgazetteItem(), response=response)
-            # document.add_value("index", str(i))
             document.add_css("ministry", f"#gvGazetteList_lbl_Ministry_{i}::text")
+            document.add_value("page", f"{self.page}:{i}")
             document.add_css("department", f"#gvGazetteList_lbl_Department_{i}::text")
             document.add_css("office", f"#gvGazetteList_lbl_Office_{i}::text")
             document.add_css("subject", f"#gvGazetteList_lbl_Subject_{i}::text")
@@ -67,7 +78,7 @@ class GazetteSpider(scrapy.Spider):
 
             yield document.load_item()
 
-        if self.page > self.total_pages:
+        if self.page >= self.total_pages:
             return
         self.page += 1
         yield NextPageRequest.request(

@@ -9,8 +9,7 @@ from itemloaders.processors import MapCompose, Join
 
 class EgazetteItem(scrapy.Item):
     strip_down = MapCompose(str.strip)
-    # define the fields for your item here like:
-    # index = scrapy.Field(input_processor=strip_down, output_processor=Join())
+    page = scrapy.Field(input_processor=strip_down, output_processor=Join())
     ministry = scrapy.Field(input_processor=strip_down, output_processor=Join())
     department = scrapy.Field(input_processor=strip_down, output_processor=Join())
     office = scrapy.Field(input_processor=strip_down, output_processor=Join())

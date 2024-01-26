@@ -3,11 +3,11 @@ from scrapy.http import FormRequest
 
 class GazetteDirectorySubmitRequest(FormRequest):
     @classmethod
-    def request(cls, response, callback):
+    def request(cls, year, response, callback):
         formdata = {
             "ddlCategory": "Extra Ordinary",
             "ddlPartSection": "Select Part & Section",
-            "ddlYear": "2024",
+            "ddlYear": f"{year}",
             "btnSubmit.x": "48",
             "btnSubmit.y": "14",
         }
@@ -25,9 +25,6 @@ class NextPageRequest(FormRequest):
         formdata = {
             "__EVENTTARGET": "gvGazetteList",
             "__EVENTARGUMENT": f"Page${page}",
-            "ddlCategory": "Extra Ordinary",
-            "ddlPartSection": "Select Part & Section",
-            "ddlYear": "2024",
             "txtPageNo": "",
         }
         return cls.from_response(

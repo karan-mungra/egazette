@@ -106,8 +106,8 @@ FEEDS = {
         "store_empty": False,
         "item_classes": [EgazetteItem],
         "fields": [
-            # "index",
             "ministry",
+            "page",
             "department",
             "office",
             "subject",
